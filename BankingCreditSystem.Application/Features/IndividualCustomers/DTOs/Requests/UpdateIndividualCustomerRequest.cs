@@ -1,11 +1,16 @@
-public class UpdateIndividualCustomerRequest
+namespace BankingCreditSystem.Application.Features.IndividualCustomers.DTOs.Requests
 {
-    public Guid Id { get; set; }
-    public string FirstName { get; set; } = default!;
-    public string LastName { get; set; } = default!;
-    public string PhoneNumber { get; set; } = default!;
-    public string Email { get; set; } = default!;
-    public string Address { get; set; } = default!;
-    public string? MotherName { get; set; }
-    public string? FatherName { get; set; }
+    public class UpdateIndividualCustomerRequest
+    {
+        // Customer Bilgileri
+        public Guid Id { get; set; }
+        public string FirstName { get; set; } = default!;
+        public string LastName { get; set; } = default!;
+        public string? MotherName { get; set; }
+        public string? FatherName { get; set; }
+
+        // ApplicationUser Bilgileri
+        public string PhoneNumber { get; set; } = default!;
+        public string Address { get; set; } = default!;
+    }
 }

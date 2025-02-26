@@ -1,4 +1,4 @@
-public class CreatedIndividualCustomerResponse
+public class CreateIndividualCustomerResponse
 {
     public Guid Id { get; set; }
     public string FirstName { get; set; } = default!;

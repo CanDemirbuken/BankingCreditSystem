@@ -1,42 +1,69 @@
 using AutoMapper;
-using BankingCreditSystem.Application.Features.IndividualCustomers.Constants;
+using BankingCreditSystem.Application.Features.IndividualCustomers.DTOs.Requests;
 using BankingCreditSystem.Application.Features.IndividualCustomers.Rules;
 using BankingCreditSystem.Application.Services.Repositories;
+using BankingCreditSystem.Core.Security.Hashing;
 using BankingCreditSystem.Domain.Entities;
 using MediatR;
 
 namespace BankingCreditSystem.Application.Features.IndividualCustomers.Commands.Create
 {
-    public class CreateIndividualCustomerCommand : IRequest<CreatedIndividualCustomerResponse>
+    public class CreateIndividualCustomerCommand : IRequest<CreateIndividualCustomerResponse>
     {
         public CreateIndividualCustomerRequest Request { get; set; } = default!;
 
-        public class CreateIndividualCustomerCommandHandler : IRequestHandler<CreateIndividualCustomerCommand, CreatedIndividualCustomerResponse>
+        public class CreateIndividualCustomerCommandHandler : IRequestHandler<CreateIndividualCustomerCommand, CreateIndividualCustomerResponse>
         {
             private readonly IIndividualCustomerRepository _individualCustomerRepository;
-            private readonly IMapper _mapper;
             private readonly IndividualCustomerBusinessRules _businessRules;
+            private readonly IMapper _mapper;
+            private readonly IHashingHelper _hashingHelper;
 
             public CreateIndividualCustomerCommandHandler(
                 IIndividualCustomerRepository individualCustomerRepository,
+                IndividualCustomerBusinessRules businessRules,
                 IMapper mapper,
-                IndividualCustomerBusinessRules businessRules)
+                IHashingHelper hashingHelper)
             {
                 _individualCustomerRepository = individualCustomerRepository;
-                _mapper = mapper;
                 _businessRules = businessRules;
+                _mapper = mapper;
+                _hashingHelper = hashingHelper;
             }
 
-            public async Task<CreatedIndividualCustomerResponse> Handle(CreateIndividualCustomerCommand command, CancellationToken cancellationToken)
+            public async Task<CreateIndividualCustomerResponse> Handle(CreateIndividualCustomerCommand request, CancellationToken cancellationToken)
             {
-                await _businessRules.NationalIdCannotBeDuplicatedWhenInserted(command.Request.NationalId);
+                await _businessRules.NationalIdCannotBeDuplicatedWhenInserted(request.Request.NationalId);
 
-                var individualCustomer = _mapper.Map<IndividualCustomer>(command.Request);
-                var createdCustomer = await _individualCustomerRepository.AddAsync(individualCustomer);
+                byte[] passwordHash, passwordSalt;
+                _hashingHelper.CreatePasswordHash(request.Request.Password, out passwordHash, out passwordSalt);
 
-                var response = _mapper.Map<CreatedIndividualCustomerResponse>(createdCustomer);
-                response.Message = IndividualCustomerMessages.CustomerCreated;
+                var applicationUser = new ApplicationUser
+                {
+                    Email = request.Request.Email,
+                    PhoneNumber = request.Request.PhoneNumber,
+                    Address = request.Request.Address,
+                    PasswordHash = passwordHash,
+                    PasswordSalt = passwordSalt,
+                    Status = true
+                };
 
+                var individualCustomer = new IndividualCustomer
+                {
+                    FirstName = request.Request.FirstName,
+                    LastName = request.Request.LastName,
+                    NationalId = request.Request.NationalId,
+                    DateOfBirth = request.Request.DateOfBirth,
+                    MotherName = request.Request.MotherName,
+                    FatherName = request.Request.FatherName,
+                    IsActive = true,
+                    User = applicationUser
+                };
+
+                await _individualCustomerRepository.AddAsync(individualCustomer);
+
+                var response = _mapper.Map<CreateIndividualCustomerResponse>(individualCustomer);
+                response.Message = "Individual customer created successfully";
                 return response;
             }
         }

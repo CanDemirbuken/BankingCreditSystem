@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using BankingCreditSystem.Application.Features.IndividualCustomers.Constants;
+using BankingCreditSystem.Application.Features.IndividualCustomers.DTOs.Requests;
 using BankingCreditSystem.Application.Features.IndividualCustomers.Rules;
 using BankingCreditSystem.Application.Services.Repositories;
 using MediatR;

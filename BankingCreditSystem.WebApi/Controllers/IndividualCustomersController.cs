@@ -3,45 +3,51 @@ using BankingCreditSystem.Application.Features.IndividualCustomers.Commands.Dele
 using BankingCreditSystem.Application.Features.IndividualCustomers.Commands.Update;
 using BankingCreditSystem.Application.Features.IndividualCustomers.Queries.GetById;
 using BankingCreditSystem.Application.Features.IndividualCustomers.Queries.GetList;
+using BankingCreditSystem.Application.Features.IndividualCustomers.DTOs.Requests;
 using Microsoft.AspNetCore.Mvc;
 
-
-public class IndividualCustomersController : BaseController
+namespace BankingCreditSystem.WebApi.Controllers
 {
-    [HttpPost]
-    public async Task<IActionResult> Create([FromBody] CreateIndividualCustomerCommand createIndividualCustomerCommand)
+    public class IndividualCustomersController : BaseController
     {
-        var result = await Mediator.Send(createIndividualCustomerCommand);
-        return Created("", result);
-    }
+        [HttpPost]
+        [ProducesResponseType(typeof(CreateIndividualCustomerResponse), StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> Create([FromBody] CreateIndividualCustomerRequest request)
+        {
+            var command = new CreateIndividualCustomerCommand { Request = request };
+            var result = await Mediator.Send(command);
+            return Created($"api/IndividualCustomers/{result.Id}", result);
+        }
 
-    [HttpPut]
-    public async Task<IActionResult> Update([FromBody] UpdateIndividualCustomerCommand updateIndividualCustomerCommand)
-    {
-        var result = await Mediator.Send(updateIndividualCustomerCommand);
-        return Ok(result);
-    }
+        [HttpPut]
+        public async Task<IActionResult> Update([FromBody] UpdateIndividualCustomerCommand updateIndividualCustomerCommand)
+        {
+            var result = await Mediator.Send(updateIndividualCustomerCommand);
+            return Ok(result);
+        }
 
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete([FromRoute] Guid id)
-    {
-        var command = new DeleteIndividualCustomerCommand { Id = id };
-        var result = await Mediator.Send(command);
-        return Ok(result);
-    }
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete([FromRoute] Guid id)
+        {
+            var command = new DeleteIndividualCustomerCommand { Id = id };
+            var result = await Mediator.Send(command);
+            return Ok(result);
+        }
 
-    [HttpGet("{id}")]
-    public async Task<IActionResult> GetById([FromRoute] Guid id)
-    {
-        var query = new GetByIdIndividualCustomerQuery { Id = id };
-        var result = await Mediator.Send(query);
-        return Ok(result);
-    }
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById([FromRoute] Guid id)
+        {
+            var query = new GetByIdIndividualCustomerQuery { Id = id };
+            var result = await Mediator.Send(query);
+            return Ok(result);
+        }
 
-    [HttpGet]
-    public async Task<IActionResult> GetList([FromQuery] GetListIndividualCustomerQuery getListIndividualCustomerQuery)
-    {
-        var result = await Mediator.Send(getListIndividualCustomerQuery);
-        return Ok(result);
+        [HttpGet]
+        public async Task<IActionResult> GetList([FromQuery] GetListIndividualCustomerQuery getListIndividualCustomerQuery)
+        {
+            var result = await Mediator.Send(getListIndividualCustomerQuery);
+            return Ok(result);
+        }
     }
 }
